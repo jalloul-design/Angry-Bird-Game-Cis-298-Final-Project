@@ -1,6 +1,6 @@
 #storing bird state, position, velocity, and if its in bounds
 
-from setting import SLINGSHOT_X, SLINGSHOT_Y
+from settings import SLINGSHOT_X, SLINGSHOT_Y
 
 class Bird:
     __slots__ = ['x', 'y', 'vx', 'vy', 'is_launched', 'is_active']
