@@ -99,14 +99,14 @@ def main():
         ui.draw_hud(screen, score, birds_left, current_level + 1)
 
         if show_title and pygame.time.get_ticks() - title_timer < settings.LEVEL_TITLE_DURATION:
-            ui.draw_level_title(screen, current_level + 1)
+            ui.draw_level_title(screen, current_level + 1, title_timer)
         else:
             show_title = False
 
         if game_state == "win":
-            ui.draw_win(screen)
+            ui.draw_win(screen, current_level + 1, current_level == len(LEVELS) - 1)
         elif game_state == "lose":
-            ui.draw_lose(screen)
+            ui.draw_losses(screen, current_level + 1)
 
         pygame.display.flip()
 

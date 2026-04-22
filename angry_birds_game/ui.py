@@ -11,7 +11,7 @@ from settings import (
 
 
 # Claude: How can I get my text to be more organized and centered on the screen
-def draw_text_in_the_center(screen, text, size, y, color=COLOR_UI_TEXT):
+def draw_text_in_the_center(screen, text, size, y, color= COLOR_UI_TEXT):
     font = pygame.font.Font(None, size)
     surface = font.render(text, True, color)
     x = (SCREEN_WIDTH - surface.get_width()) // 2
