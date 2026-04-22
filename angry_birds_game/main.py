@@ -3,6 +3,7 @@
 # Game loop, event polling, calls physics update and renderer each frame
 
 import pygame
+import random
 import settings
 from source import physics
 from source import collision
@@ -12,13 +13,13 @@ import ui
 import level_1
 import level_2
 import level_3
-from source import bird
+from source import bird as bird_module
 
 LEVELS = [level_1, level_2, level_3]
 
 def load_level(index):
     level = LEVELS[index]
-    return level.get_obstacles(), level.get_targets(), bird.Bird()
+    return level.get_obstacles(), level.get_targets(), bird_module.Bird()
 
 def main():
     pygame.init()
@@ -32,7 +33,8 @@ def main():
     birds_left = 5
     slingshot_held = False
     mouse_start = None
-    game_state = "hub"
+    game_state = "playing"
+    shake_timer = 0
     hub_buttons = []
     title_timer = pygame.time.get_ticks()
     show_title = True
@@ -55,7 +57,6 @@ def main():
                 pygame.quit()
                 return
 
-        # level selection and menu input handling
             if game_state == "hub" and event.type == pygame.MOUSEBUTTONDOWN:
                 for button in hub_buttons:
                     if button.mouse_clicked(event):
@@ -64,18 +65,18 @@ def main():
                             current_level = selected_level
                             obstacles, targets, bird = load_level(current_level)
                             score = 0
-                            birds_left = 5 
+                            birds_left = 5
                             game_state = "playing"
                             show_title = True
                             title_timer = pygame.time.get_ticks()
                             break
                         elif button.action == "goto_menu":
-
                             pass
 
             if game_state == "playing":
                 slingshot_held, mouse_start = game_logic.handle_input(
                     event, bird, slingshot_held, mouse_start)
+
             if game_state in ("win", "lose"):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
@@ -98,6 +99,7 @@ def main():
         if game_state == "hub":
             hub_buttons = ui.draw_hub(screen, score, birds_left, current_level + 1)
             show_title = False
+
         elif game_state == "playing":
             physics.update(bird)
             hit = collision.check(bird, obstacles + targets)
@@ -106,10 +108,11 @@ def main():
                 score += 100
                 bird.is_active = False
                 bird.is_launched = False
+                shake_timer = 10
 
             if not bird.is_active or game_logic.check_lose(bird, targets):
                 birds_left -= 1
-                bird = Bird()
+                bird = bird_module.Bird()
                 if birds_left <= 0 and not game_logic.check_win(targets):
                     game_state = "lose"
 
@@ -117,16 +120,27 @@ def main():
                 game_state = "win"
 
             bg = bg_images[current_level] if current_level < len(bg_images) else None
-            renderer.draw_scene(screen, bird, obstacles, targets, bg,
+
+            if shake_timer > 0:
+                shake_x = random.randint(-8, 8)
+                shake_y = random.randint(-8, 8)
+                shake_timer -= 1
+            else:
+                shake_x, shake_y = 0, 0
+
+            screen.fill((0, 0, 0))
+            temp_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
+            renderer.draw_scene(temp_surface, bird, obstacles, targets, bg,
                                 slingshot_held, mouse_pos if slingshot_held else None)
+            screen.blit(temp_surface, (shake_x, shake_y))
             ui.draw_hud(screen, score, birds_left, current_level + 1)
 
             if show_title and pygame.time.get_ticks() - title_timer < settings.LEVEL_TITLE_DURATION:
                 ui.draw_level_title(screen, current_level + 1, title_timer)
             else:
                 show_title = False
+
         else:
-            # If we are in win/lose state, draw the game scene still so the overlay can show.
             bg = bg_images[current_level] if current_level < len(bg_images) else None
             renderer.draw_scene(screen, bird, obstacles, targets, bg,
                                 slingshot_held, mouse_pos if slingshot_held else None)
