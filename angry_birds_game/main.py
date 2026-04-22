@@ -4,9 +4,9 @@
 
 import pygame
 import settings
-import physics
-import collision
-import game_logic
+from source import physics
+from source import collision
+from source import game_logic
 import renderer
 import ui
 import level_1
