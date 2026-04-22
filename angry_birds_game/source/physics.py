@@ -12,7 +12,6 @@ def update(bird):
     bird.y += bird.vy 
 
 #future position
-# **TODO**: Mira: use this and add UI that shows the trajectory
 def future_pos(bird, frames_ahead): 
     x, y = bird.x, bird.y
     vx, vy = bird.vx, bird.vy

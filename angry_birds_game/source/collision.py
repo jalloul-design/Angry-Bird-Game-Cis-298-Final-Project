@@ -3,7 +3,7 @@
 
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
-
+# returns the first obstacle hit or None
 def check(bird, obstacle_list):
     if not bird.is_launched or not bird.is_active:
         return None
@@ -23,12 +23,12 @@ def check(bird, obstacle_list):
 def destroy(obstacle):
     obstacle.active = False
 
-
+# checks if the bird is out of bounds
 def out_of_bounds(bird):
     m = 100
     return not (-m < bird.x < SCREEN_WIDTH + m and -m < bird.y < SCREEN_HEIGHT + m)
 
-
+# checks if a rectangle is hit by bird
 def _hits(cx, cy, radius, obs):
     nx = max(obs.x, min(cx, obs.x + obs.width))
     ny = max(obs.y, min(cy, obs.y + obs.height))
