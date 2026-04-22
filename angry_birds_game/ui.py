@@ -11,7 +11,7 @@ from settings import (
 
 
 # Claude: How can I get my text to be more organized and centered on the screen
-def draw_text_in_the_center(screen, text, size, y, color=COLOR_UI_TEXT):
+def draw_text_in_the_center(screen, text, size, y, color= COLOR_UI_TEXT):
     font = pygame.font.Font(None, size)
     surface = font.render(text, True, color)
     x = (SCREEN_WIDTH - surface.get_width()) // 2
@@ -71,9 +71,35 @@ def draw_menu(screen):
     return [start_button, quit_button]
 
 
-def draw_hub(screen):
+# level select screen, shows score, birds left, and level number at top left, and has buttons for each level and a back button to return to menu
+def draw_hud(screen, score, birds_left, current_level):
+    font_small = pygame.font.Font(None, 40)
+    score_text = font_small.render(f"Score: {score}", True, COLOR_UI_TEXT)
+    screen.blit(score_text, (20, 20))
+
+    birds_text = font_small.render(f"Birds: {birds_left}", True, COLOR_UI_TEXT)
+    screen.blit(birds_text, (20, 60))
+
+    level_text = font_small.render(f"Level: {current_level}", True, COLOR_UI_TEXT)
+    screen.blit(level_text, (20, 100))
+
+
+def draw_hub(screen, score, birds_left, current_level):
     screen.fill(COLOR_SKY)
     draw_text_in_the_center(screen, "Start A Level", 80, 60, COLOR_UI_TITLE)
+
+    # score, birds left, and level number display
+    font_small = pygame.font.Font(None, 40)
+    score_text = font_small.render(f"Score: {score}", True, COLOR_BUTTON_TEXT)
+    screen.blit(score_text, (20, 20))
+
+    # level number and birds left display
+    birds_text = font_small.render(f"Birds: {birds_left}", True, COLOR_BUTTON_TEXT)
+    screen.blit(birds_text, (20, 60))
+
+    # level number display
+    level_text = font_small.render(f"Level: {current_level}", True, COLOR_BUTTON_TEXT)
+    screen.blit(level_text, (20, 100))
 
     buttons = []
     level_box_size = 150
