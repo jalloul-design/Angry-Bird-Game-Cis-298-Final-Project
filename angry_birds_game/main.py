@@ -12,7 +12,7 @@ import ui
 import level_1
 import level_2
 import level_3
-from bird import Bird
+from source import Bird
 
 LEVELS = [level_1, level_2, level_3]
 
