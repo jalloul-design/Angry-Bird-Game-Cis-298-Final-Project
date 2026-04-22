@@ -71,9 +71,22 @@ def draw_menu(screen):
     return [start_button, quit_button]
 
 
-def draw_hud(screen):
+def draw_hud(screen, score, birds_left, current_level):  
     screen.fill(COLOR_SKY)
     draw_text_in_the_center(screen, "Start A Level", 80, 60, COLOR_UI_TITLE)
+
+    # score, birds left, and level number display
+    font_small = pygame.font.Font(None, 40)
+    score_text = font_small.render(f"Score: {score}", True, COLOR_BUTTON_TEXT)
+    screen.blit(score_text, (20, 20))
+
+    # level number and birds left display
+    birds_text = font_small.render(f"Birds: {birds_left}", True, COLOR_BUTTON_TEXT)
+    screen.blit(birds_text, (20, 60))
+
+    # level number display
+    level_text = font_small.render(f"Level: {current_level}", True, COLOR_BUTTON_TEXT)
+    screen.blit(level_text, (20, 100))
 
     buttons = []
     level_box_size = 150
