@@ -71,7 +71,7 @@ def draw_menu(screen):
     return [start_button, quit_button]
 
 
-def draw_hub(screen):
+def draw_hud(screen):
     screen.fill(COLOR_SKY)
     draw_text_in_the_center(screen, "Start A Level", 80, 60, COLOR_UI_TITLE)
 
