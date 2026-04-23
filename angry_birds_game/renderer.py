@@ -27,8 +27,11 @@ def draw_bird(screen, bird_img, x, y):
     screen.blit(bird_img, (x, y))
 
 
+
+
 def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
     draw_background(screen)
     draw_bird(screen, red_bird_img, 170, 470)
     draw_bird(screen, black_bird_img, 100, 500)
     draw_bird(screen, yellow_bird_img, 50, 520)
+
