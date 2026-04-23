@@ -12,13 +12,13 @@ import ui
 import level_1
 import level_2
 import level_3
-from source import Bird
+from source import bird
 
 LEVELS = [level_1, level_2, level_3]
 
 def load_level(index):
     level = LEVELS[index]
-    return level.get_obstacles(), level.get_targets(), Bird()
+    return level.get_obstacles(), level.get_targets(), bird.Bird()
 
 def main():
     pygame.init()
