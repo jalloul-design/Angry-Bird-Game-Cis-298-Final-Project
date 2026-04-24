@@ -92,6 +92,19 @@ def draw_background(screen):
     screen.blit(cloud_img, (920, 35))
     pygame.draw.rect(screen, COLOR_GROUND, (0, 620, SCREEN_WIDTH, SCREEN_HEIGHT))
 
+# health bar on top of an object
+def draw_health_bar(screen, x, y, width, health, max_health):
+    if max_health <= 0:
+        return
+    bar_width = width
+    bar_height = 6
+    bar_x = x
+    bar_y = y - 12
+    filled_width = int(bar_width * max(0, health) / max(max_health, 1))
+    pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height))
+    pygame.draw.rect(screen, (200, 40, 40), (bar_x, bar_y, filled_width, bar_height))
+
+
 def draw_bird(screen, bird_img, x, y, angle=0):
     if angle != 0:
         # rotate bird sprite
@@ -134,6 +147,8 @@ def draw_obstacles(screen, obstacles):
             # Draw border
             pygame.draw.rect(screen, (max(0, COLOR_OBSTACLE[0] - 30), max(0, COLOR_OBSTACLE[1] - 30), max(0, COLOR_OBSTACLE[2] - 30)),
                            (x, y, w, h), 2)
+            if obs.get('health') is not None: # health bar on obstacles
+                draw_health_bar(screen, x, y, w, obs['health'], obs.get('max_health', obs['health']))
 
 def draw_targets(screen, targets):
     from settings import COLOR_TARGET
@@ -148,6 +163,8 @@ def draw_targets(screen, targets):
             # Draw border
             pygame.draw.rect(screen, (max(0, COLOR_TARGET[0] - 30), max(0, COLOR_TARGET[1] - 30), max(0, COLOR_TARGET[2] - 30)),
                            (x, y, w, h), 2)
+            if target.get('health') is not None: # health bar on targets
+                draw_health_bar(screen, x, y, w, target['health'], target.get('max_health', target['health']))
 
 
 def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):

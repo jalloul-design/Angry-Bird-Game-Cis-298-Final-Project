@@ -43,9 +43,14 @@ def check(bird, obstacle_list):
 
     return None
 
-
-def destroy(obstacle):
-    obstacle["active"] = False
+# destroys an object based on its health insteaed of insta
+def destroy(obstacle, damage=1):
+    if obstacle.get("health") is not None:
+        obstacle["health"] = max(0, obstacle["health"] - damage)
+        if obstacle["health"] <= 0:
+            obstacle["active"] = False
+    else:
+        obstacle["active"] = False
 
 # checks if the bird is out of bounds
 def out_of_bounds(bird):
