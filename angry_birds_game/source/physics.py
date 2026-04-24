@@ -1,5 +1,15 @@
 from settings import GRAVITY, AIR_RESISTANCE, GROUND_Y
 
+def apply_physics_defaults(obj, mass=1.0, friction=0.3): # added this helper to avoid rewriting in every lvl design
+    # ensure a physics object has the required motion and collision fields
+    obj.setdefault('vx', 0)
+    obj.setdefault('vy', 0)
+    obj.setdefault('angle', 0)
+    obj.setdefault('angular_velocity', 0)
+    obj.setdefault('mass', mass)
+    obj.setdefault('friction', friction)
+    return obj
+
 def update(bird):
     if not bird.is_launched or not bird.is_active:
         return
