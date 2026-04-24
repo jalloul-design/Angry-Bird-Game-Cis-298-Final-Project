@@ -22,6 +22,7 @@ MAX_DRAG = 120
 
 # Ground level (y coordinate where ground starts)
 GROUND_Y = 620
+SKY_Y = 0
 
 # --- Sazid: Physics constants (to be filled by Sazid) ---
 GRAVITY = 0.4

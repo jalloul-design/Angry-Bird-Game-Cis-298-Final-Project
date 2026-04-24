@@ -1,7 +1,7 @@
 import pygame
 from pathlib import Path
 from settings import SLINGSHOT_X, SLINGSHOT_Y, DRAG_MULTIPLIER, COLOR_TRAJECTORY, MAX_DRAG
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_SKY, COLOR_GROUND, GRAVITY
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_SKY, COLOR_GROUND, GRAVITY, GROUND_Y, SKY_Y
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ASSETS_DIR = BASE_DIR / "assets"
@@ -115,8 +115,8 @@ def draw_trajectory(screen, start_x, start_y, vx, vy):
             y = y + simulate_vy
             simulate_vy = simulate_vy + GRAVITY
 
-        # Stop drawing the trajectory if user goes out of bounds
-        if y > 620:
+        # If user aims the trajectory out of bounds, the trajectory disappears
+        if y > GROUND_Y or y < SKY_Y:
             break
 
         pygame.draw.circle(screen, COLOR_TRAJECTORY, (int(x), int(y)), 2)
