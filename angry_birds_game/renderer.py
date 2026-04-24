@@ -29,7 +29,7 @@ def trigger_explosion(x, y, obj_type="obstacle"):
     activate_explosion.append(recurring_explosion)
 
 def trigger_impact(x, y):
-    # creating dust color clouds after explosion happens
+    # creating dust color cloud after explosion happens
     new_trigger_impact = {"x": x, "y": y, "color": (200,200,200), "start_time": pygame.time.get_ticks()}
     activate_explosion.append(new_trigger_impact)
 
