@@ -15,16 +15,75 @@ red_bird_img = pygame.transform.scale(red_bird_img, (60, 60))
 black_bird_img = pygame.transform.scale(black_bird_img, (60, 60))
 yellow_bird_img = pygame.transform.scale(yellow_bird_img, (60, 60))
 
-#explosion placehilders **TODO**
+activate_explosion = []
+
 def trigger_explosion(x, y, obj_type="obstacle"):
     # explosion placeholder for game logic
+    if obj_type == "target":
+        color = (250, 200, 50)
+    else:
+        color = (250, 150 ,100)
 
-
-    return
+    # Have the explosion occur everytime you hit an object
+    recurring_explosion = {"x": x, "y": y, "color": color, "start_time": pygame.time.get_ticks()}
+    activate_explosion.append(recurring_explosion)
 
 def trigger_impact(x, y):
-    return
+    # creating dust color clouds after explosion happens
+    new_trigger_impact = {"x": x, "y": y, "color": (200,200,200), "start_time": pygame.time.get_ticks()}
+    activate_explosion.append(new_trigger_impact)
 
+# Claude: How do I draw the explosions to look like real explosion in an angry bird game
+def draw_explosions(screen):
+
+    # How long each explosion lasts in milliseconds
+    duration = 1000
+
+    # Make a new list for explosions that are still playing
+    explosion_still_in_play = []
+
+    for explosion in activate_explosion:
+        # Check how long explosion has been going for
+        time_now = pygame.time.get_ticks()
+        elapsed = time_now - explosion["start_time"]
+
+        # If it's been going too long, skip it so it disappears
+        if elapsed >= duration:
+            continue
+
+        # Amination Time
+        progress = elapsed / duration
+
+        # The explosion starting size + how big it will get
+        radius = int(10 + progress * 50)
+        # The explosion fading out
+        alpha = int(255 * (1 - progress))
+
+        # To draw with transparency we need a separate surface
+        size = radius * 2
+        explosion_surface = pygame.Surface((size, size), pygame.SRCALPHA)
+
+        # Get the color + add transparency
+        red = explosion["color"][0]
+        green = explosion["color"][1]
+        blue = explosion["color"][2]
+        color_with_transparency = (red, green, blue, alpha)
+
+        # Draw the circle on the temporary surface
+        pygame.draw.circle(explosion_surface, color_with_transparency, (radius, radius), radius)
+
+        # Adding the surface onto the screen at the explosion's position
+        draw_x = explosion["x"] - radius
+        draw_y = explosion["y"] - radius
+        screen.blit(explosion_surface, (draw_x, draw_y))
+
+        # If one is still going, keep it in the new list
+        explosion_still_in_play.append(explosion)
+
+    # Replacing the old list with just the explosions still in play
+    activate_explosion.clear()
+    for explosion in explosion_still_in_play:
+        activate_explosion.append(explosion)
 
 def draw_background(screen):
     screen.fill(COLOR_SKY)
@@ -105,6 +164,7 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
     draw_bird(screen, red_bird_img, 170, 470)
     draw_bird(screen, black_bird_img, 100, 500)
     draw_bird(screen, yellow_bird_img, 50, 520)
+    draw_explosions(screen)
 
     if slingshot_held and mouse_pos is not None:
         mx, my = mouse_pos
