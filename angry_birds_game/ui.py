@@ -154,7 +154,7 @@ def draw_win(screen, level_number, last_level=False):
     buttons = []
 
     if last_level:
-        # Since this is a demo and we're only going up to level 3, lead the user back to either the menu or they can replay
+        # Since this is a demo, and we're only going up to level 3, lead the user back to either the menu or they can replay
         replay_button = Button(450, 410, 170, 60, "Replay Level", "play_level_" + str(level_number))
         menu_button = Button(650, 410, 170, 60, "Go To Menu", "goto_menu")
         replay_button.draw(screen)

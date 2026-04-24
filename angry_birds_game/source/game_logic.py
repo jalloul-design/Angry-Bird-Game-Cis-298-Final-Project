@@ -3,14 +3,15 @@
 
 import math
 import settings
+import pygame
 
 def handle_input(event, bird, slingshot_held, mouse_start):
-    if event.type == 5:  # MOUSEBUTTONDOWN
+    if event.type == pygame.MOUSEBUTTONDOWN:
         mx, my = event.pos
         dist = math.hypot(mx - settings.SLINGSHOT_X, my - settings.SLINGSHOT_Y)
         if dist < 40:
             return True, (mx, my)
-    if event.type == 6 and slingshot_held:  # MOUSEBUTTONUP
+    if event.type == pygame.MOUSEBUTTONUP and slingshot_held:
         mx, my = event.pos
         dx = settings.SLINGSHOT_X - mx
         dy = settings.SLINGSHOT_Y - my

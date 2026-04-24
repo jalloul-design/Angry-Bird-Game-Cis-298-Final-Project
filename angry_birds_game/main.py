@@ -14,12 +14,13 @@ import level_1
 import level_2
 import level_3
 from source import bird as bird_module
+from source.bird import Bird
 
 LEVELS = [level_1, level_2, level_3]
 
 def load_level(index):
     level = LEVELS[index]
-    return level.get_obstacles(), level.get_targets(), bird_module.Bird()
+    return level.get_obstacles(), level.get_targets(), Bird()
 
 def main():
     pygame.init()
@@ -33,9 +34,10 @@ def main():
     birds_left = 5
     slingshot_held = False
     mouse_start = None
-    game_state = "playing"
+    game_state = "menu"   # <-- FIX: start at menu, not "playing"
     shake_timer = 0
     hub_buttons = []
+    menu_buttons = []
     title_timer = pygame.time.get_ticks()
     show_title = True
 
@@ -57,6 +59,17 @@ def main():
                 pygame.quit()
                 return
 
+            # --- MENU state ---
+            if game_state == "menu" and event.type == pygame.MOUSEBUTTONDOWN:
+                for button in menu_buttons:
+                    if button.mouse_clicked(event):
+                        if button.action == "goto_hub":
+                            game_state = "hub"
+                        elif button.action == "quit_game":
+                            pygame.quit()
+                            return
+
+            # --- HUB state ---
             if game_state == "hub" and event.type == pygame.MOUSEBUTTONDOWN:
                 for button in hub_buttons:
                     if button.mouse_clicked(event):
@@ -71,12 +84,14 @@ def main():
                             title_timer = pygame.time.get_ticks()
                             break
                         elif button.action == "goto_menu":
-                            pass
+                            game_state = "menu"
 
+            # --- PLAYING state ---
             if game_state == "playing":
                 slingshot_held, mouse_start = game_logic.handle_input(
                     event, bird, slingshot_held, mouse_start)
 
+            # --- WIN / LOSE state ---
             if game_state in ("win", "lose"):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
@@ -96,23 +111,56 @@ def main():
                             show_title = True
                             title_timer = pygame.time.get_ticks()
 
-        if game_state == "hub":
+                # Handle win/lose button clicks
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    win_lose_buttons = win_lose_button_list if 'win_lose_button_list' in dir() else []
+                    for button in win_lose_button_list if 'win_lose_button_list' in locals() else []:
+                        if button.mouse_clicked(event):
+                            if button.action.startswith("play_level_"):
+                                selected_level = int(button.action.split("play_level_")[1]) - 1
+                                current_level = selected_level
+                                obstacles, targets, bird = load_level(current_level)
+                                score = 0
+                                birds_left = 5
+                                game_state = "playing"
+                                show_title = True
+                                title_timer = pygame.time.get_ticks()
+                            elif button.action == "goto_menu":
+                                game_state = "menu"
+
+        # ======== DRAW SECTION ========
+
+        if game_state == "menu":
+            menu_buttons = ui.draw_menu(screen)
+
+        elif game_state == "hub":
             hub_buttons = ui.draw_hub(screen, score, birds_left, current_level + 1)
             show_title = False
 
         elif game_state == "playing":
             physics.update(bird)
+            for obj in obstacles + targets:
+                physics.update_physics_object(obj)
+
             hit = collision.check(bird, obstacles + targets)
             if hit:
-                collision.destroy_object(hit)
+                renderer.trigger_impact(bird.x, bird.y)
+                center_x = hit["x"] + hit["width"] // 2
+                center_y = hit["y"] + hit["height"] // 2
+                obj_type = "target" if hit in targets else "obstacle"
+                renderer.trigger_explosion(center_x, center_y, obj_type)
+                collision.destroy(hit)
                 score += 100
                 bird.is_active = False
                 bird.is_launched = False
                 shake_timer = 10
 
             if not bird.is_active or game_logic.check_lose(bird, targets):
+                from settings import GROUND_Y
+                if bird.y + 20 >= GROUND_Y - 5:
+                    renderer.trigger_impact(bird.x, bird.y)
                 birds_left -= 1
-                bird = bird_module.Bird()
+                bird = Bird()
                 if birds_left <= 0 and not game_logic.check_win(targets):
                     game_state = "lose"
 
@@ -147,9 +195,9 @@ def main():
             ui.draw_hud(screen, score, birds_left, current_level + 1)
 
         if game_state == "win":
-            ui.draw_win(screen, current_level + 1, current_level == len(LEVELS) - 1)
+            win_lose_button_list = ui.draw_win(screen, current_level + 1, current_level == len(LEVELS) - 1)
         elif game_state == "lose":
-            ui.draw_losses(screen, current_level + 1)
+            win_lose_button_list = ui.draw_losses(screen, current_level + 1)
 
         pygame.display.flip()
 
