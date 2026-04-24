@@ -13,12 +13,13 @@ import level_1
 import level_2
 import level_3
 from source import bird
+from source.bird import Bird
 
 LEVELS = [level_1, level_2, level_3]
 
 def load_level(index):
     level = LEVELS[index]
-    return level.get_obstacles(), level.get_targets(), bird.Bird()
+    return level.get_obstacles(), level.get_targets(), Bird()
 
 def main():
     pygame.init()
@@ -100,14 +101,32 @@ def main():
             show_title = False
         elif game_state == "playing":
             physics.update(bird)
+            # Update physics for all obstacles and targets 
+            for obj in obstacles + targets:
+                physics.update_physics_object(obj)
+            
             hit = collision.check(bird, obstacles + targets)
             if hit:
-                collision.destroy_object(hit)
+                # Trigger impact effect at collision point
+                renderer.trigger_impact(bird.x, bird.y)
+                
+                # Trigger explosion effect for destroyed object
+                center_x = hit["x"] + hit["width"] // 2
+                center_y = hit["y"] + hit["height"] // 2
+                obj_type = "target" if hit in targets else "obstacle"
+                renderer.trigger_explosion(center_x, center_y, obj_type)
+                
+                collision.destroy(hit)
                 score += 100
                 bird.is_active = False
                 bird.is_launched = False
 
             if not bird.is_active or game_logic.check_lose(bird, targets):
+                # Check if bird hit ground (for impact effect)
+                from settings import GROUND_Y
+                if bird.y + 20 >= GROUND_Y - 5:  # Bird radius is 20
+                    renderer.trigger_impact(bird.x, bird.y)
+                
                 birds_left -= 1
                 bird = Bird()
                 if birds_left <= 0 and not game_logic.check_win(targets):

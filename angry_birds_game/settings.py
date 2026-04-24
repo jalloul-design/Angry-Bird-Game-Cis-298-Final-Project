@@ -20,8 +20,12 @@ DRAG_MULTIPLIER = 0.3
 # Maximum drag distance in pixels (limits launch power)
 MAX_DRAG = 120
 
+# Ground level (y coordinate where ground starts)
+GROUND_Y = 620
+
 # --- Sazid: Physics constants (to be filled by Sazid) ---
-GRAVITY = 0.5
+GRAVITY = 0.4
+AIR_RESISTANCE = 0.99  # Velocity multiplier per frame (slight air resistance)
 
 # --- Mira: Color values (to be filled by Mira) ---
 COLOR_SKY = (135, 206, 235)
