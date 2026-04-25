@@ -11,10 +11,13 @@ cloud_img = pygame.transform.scale(cloud_img, (150, 80))
 red_bird_img = pygame.image.load(str(ASSETS_DIR / "red_bird.png"))
 black_bird_img = pygame.image.load(str(ASSETS_DIR / "black_bird.png"))
 yellow_bird_img = pygame.image.load(str(ASSETS_DIR / "yellow_bird.png"))
+pig_img = pygame.image.load(str(ASSETS_DIR / "pig.png"))
+slingshot_img = pygame.image.load(str(ASSETS_DIR / "slingshot.png"))
 red_bird_img = pygame.transform.scale(red_bird_img, (60, 60))
 black_bird_img = pygame.transform.scale(black_bird_img, (60, 60))
 yellow_bird_img = pygame.transform.scale(yellow_bird_img, (60, 60))
-
+pig_img = pygame.transform.scale(pig_img, (40, 40))
+slingshot_img = pygame.transform.scale(slingshot_img, (150, 170))
 activate_explosion = []
 
 def trigger_explosion(x, y, obj_type="obstacle"):
@@ -114,6 +117,16 @@ def draw_bird(screen, bird_img, x, y, angle=0):
     else:
         screen.blit(bird_img, (x, y))
 
+def draw_pigs(screen,pigs):
+    for pig in pigs:
+        if pig.get("active", True):
+            screen.blit(pig_img, (pig["x"], pig["y"]))
+
+def draw_slingshot(screen):
+    x = SLINGSHOT_X - 90
+    y = SLINGSHOT_Y - 30
+    screen.blit(slingshot_img, (x, y))
+
 def draw_trajectory(screen, start_x, start_y, vx, vy):
     """Draw a dotted trajectory """
     x = start_x
@@ -173,6 +186,7 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
     else:
         draw_background(screen)
 
+    draw_slingshot(screen)
     draw_obstacles(screen, obstacles)
     draw_targets(screen, targets)
     bird_angle = getattr(bird, 'angle', 0)
@@ -182,6 +196,8 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
     draw_bird(screen, black_bird_img, 100, 500)
     draw_bird(screen, yellow_bird_img, 50, 520)
     draw_explosions(screen)
+    draw_pigs(screen, targets)
+
 
     if slingshot_held and mouse_pos is not None:
         mx, my = mouse_pos
@@ -193,7 +209,6 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
         vx = dx * DRAG_MULTIPLIER
         vy = dy * DRAG_MULTIPLIER
         draw_trajectory(screen, SLINGSHOT_X, SLINGSHOT_Y, vx, vy)
-
 
 
 
