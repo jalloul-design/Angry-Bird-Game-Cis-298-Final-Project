@@ -142,8 +142,9 @@ def main():
             for obj in obstacles + targets:
                 physics.update_physics_object(obj)
 
-            hit = collision.check(bird, obstacles + targets)
-            if hit:
+            # go through every new thing the bird touches but dont end the turn on first impact
+            hits = collision.check(bird, obstacles + targets)
+            for hit in hits:
                 renderer.trigger_impact(bird.x, bird.y)
                 center_x = hit["x"] + hit["width"] // 2
                 center_y = hit["y"] + hit["height"] // 2
@@ -151,8 +152,6 @@ def main():
                 renderer.trigger_explosion(center_x, center_y, obj_type)
                 collision.destroy(hit)
                 score += 100
-                bird.is_active = False
-                bird.is_launched = False
                 shake_timer = 10
 
             if not bird.is_active or game_logic.check_lose(bird, targets):
