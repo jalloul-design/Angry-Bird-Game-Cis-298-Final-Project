@@ -179,7 +179,7 @@ def main():
             screen.fill((0, 0, 0))
             temp_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
             renderer.draw_scene(temp_surface, bird, obstacles, targets, bg,
-                                slingshot_held, mouse_pos if slingshot_held else None)
+                                slingshot_held, mouse_pos if slingshot_held else None, birds_left)
             screen.blit(temp_surface, (shake_x, shake_y))
             ui.draw_hud(screen, score, birds_left, current_level + 1)
 
@@ -191,7 +191,7 @@ def main():
         else:
             bg = bg_images[current_level] if current_level < len(bg_images) else None
             renderer.draw_scene(screen, bird, obstacles, targets, bg,
-                                slingshot_held, mouse_pos if slingshot_held else None)
+                                slingshot_held, mouse_pos if slingshot_held else None, birds_left)
             ui.draw_hud(screen, score, birds_left, current_level + 1)
 
         if game_state == "win":
