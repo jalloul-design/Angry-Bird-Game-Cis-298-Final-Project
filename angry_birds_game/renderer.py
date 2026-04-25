@@ -180,7 +180,7 @@ def draw_targets(screen, targets):
                 draw_health_bar(screen, x, y, w, target['health'], target.get('max_health', target['health']))
 
 
-def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
+def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, birds_left):
     if bg is not None:
         screen.blit(bg,(0,0)) # Claude logic in order to fix error
     else:
@@ -190,7 +190,18 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos):
     draw_obstacles(screen, obstacles)
     draw_targets(screen, targets)
     bird_angle = getattr(bird, 'angle', 0)
-    draw_bird(screen, red_bird_img, bird.x - 30, bird.y - 30, bird_angle)
+   # Claude: How can I get the birds to rotate taking a hit rather than one color bird to do it
+    shots_taken = 5 - birds_left
+    bird_index = shots_taken % 3
+
+    if bird_index == 0:
+        current_bird_img = red_bird_img
+    elif bird_index == 1:
+        current_bird_img = yellow_bird_img
+    else:
+        current_bird_img = black_bird_img
+
+    draw_bird(screen, current_bird_img, bird.x - 30, bird.y - 30, bird_angle)
 
     draw_bird(screen, red_bird_img, 170, 470)
     draw_bird(screen, black_bird_img, 100, 500)
