@@ -30,11 +30,11 @@ def draw_slingshot_rubber_band(screen, mouse_pos):
     clamped_x = settings.SLINGSHOT_X - dx
     clamped_y = settings.SLINGSHOT_Y - dy
     pygame.draw.line(screen, (139, 90, 40),
-                     (settings.SLINGSHOT_X - 20, settings.SLINGSHOT_Y - 60),
-                     (clamped_x, clamped_y), 3)
+                     (settings.SLINGSHOT_X - 60, settings.SLINGSHOT_Y - 35),  # match left dot
+                     (clamped_x, clamped_y), 5)
     pygame.draw.line(screen, (139, 90, 40),
-                     (settings.SLINGSHOT_X + 20, settings.SLINGSHOT_Y - 60),
-                     (clamped_x, clamped_y), 3)
+                     (settings.SLINGSHOT_X + 45, settings.SLINGSHOT_Y - 30),  # match right dot
+                     (clamped_x, clamped_y), 5)
 
 def draw_low_bird_warning(screen, birds_left):
     if birds_left == 1:
