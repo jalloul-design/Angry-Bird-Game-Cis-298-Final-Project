@@ -22,10 +22,6 @@ def load_level(index):
     return level.get_obstacles(), level.get_targets(), bird_module.Bird()
 
 def draw_slingshot_rubber_band(screen, mouse_pos):
-    """
-    Draws a rubber band line from the slingshot anchor to the mouse
-    so the player can see they are stretching the slingshot.
-    """
     mx, my = mouse_pos
     dx = settings.SLINGSHOT_X - mx
     dy = settings.SLINGSHOT_Y - my
@@ -33,7 +29,6 @@ def draw_slingshot_rubber_band(screen, mouse_pos):
     dy = max(-settings.MAX_DRAG, min(settings.MAX_DRAG, dy))
     clamped_x = settings.SLINGSHOT_X - dx
     clamped_y = settings.SLINGSHOT_Y - dy
-
     pygame.draw.line(screen, (139, 90, 40),
                      (settings.SLINGSHOT_X - 20, settings.SLINGSHOT_Y - 60),
                      (clamped_x, clamped_y), 3)
@@ -42,9 +37,6 @@ def draw_slingshot_rubber_band(screen, mouse_pos):
                      (clamped_x, clamped_y), 3)
 
 def draw_low_bird_warning(screen, birds_left):
-    """
-    Flashes a warning on screen when the player only has 1 bird left.
-    """
     if birds_left == 1:
         if (pygame.time.get_ticks() // 400) % 2 == 0:
             font = pygame.font.SysFont("Arial", 30, bold=True)
@@ -133,20 +125,26 @@ def main():
 
         elif game_state == "playing":
             physics.update(bird)
-            hit = collision.check(bird, obstacles + targets)
-            if hit:
-                collision.destroy_object(hit)
-                score += 100
-                bird.is_active = False
-                bird.is_launched = False
-                shake_timer = 10
-                renderer.trigger_explosion(
-                    hit["x"], hit["y"],
-                    "target" if hit in targets else "obstacle"
-                )
-                renderer.trigger_impact(hit["x"], hit["y"])
 
-            if not bird.is_active or game_logic.check_lose(bird, targets):
+            # handle bird collisions with obstacles and targets
+            events = collision.check(bird, obstacles + targets)
+            for event in events:
+                if event.get("destroyed"):
+                    score += event.get("score", 100)
+                    shake_timer = 10
+                    cx, cy = event.get("center", (event["target"]["x"], event["target"]["y"]))
+                    obj_type = "target" if event["target"] in targets else "obstacle"
+                    renderer.trigger_explosion(cx, cy, obj_type)
+                    renderer.trigger_impact(cx, cy)
+
+            # handle environment collisions between blocks and pigs
+            block_events, pig_events = collision.check_environment_collisions(obstacles, targets)
+            for event in block_events + pig_events:
+                if event.get("destroyed"):
+                    score += event.get("score", 100)
+
+            # check if bird is out of bounds
+            if collision.out_of_bounds(bird) or not bird.is_active:
                 birds_left -= 1
                 bird = bird_module.Bird()
                 if birds_left <= 0 and not game_logic.check_win(targets):
