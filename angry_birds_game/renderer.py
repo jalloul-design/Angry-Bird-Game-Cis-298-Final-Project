@@ -163,11 +163,13 @@ def draw_obstacles(screen, obstacles):
         if obs.get("active", True):
             x, y, w, h = obs["x"], obs["y"], obs["width"], obs["height"]
             color = _get_obstacle_color(obs.get("material", "wood"))
+
             # Draw shadow
             pygame.draw.rect(screen, (max(0, color[0] - 50), max(0, color[1] - 50), max(0, color[2] - 50)),
                            (x + 2, y + 2, w, h))
             # Draw main obstacle
             pygame.draw.rect(screen, color, (x, y, w, h))
+
             # Draw border
             pygame.draw.rect(screen, (max(0, color[0] - 30), max(0, color[1] - 30), max(0, color[2] - 30)),
                            (x, y, w, h), 2)
