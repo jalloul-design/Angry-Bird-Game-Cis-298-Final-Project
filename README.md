@@ -88,15 +88,14 @@ April 25: Added more impacts so the bird does not stop after only one hit (40 mi
 
 April 25: Added supporting pillars and refined the level design to work with the new physics (35 mins)
 
-Mira:
-April 22: Built ui.py — menu, hub, win, lose, and level title screens (1 hour)
-
-April 22: Added Button class with hover effects (30 mins)
-
-April 23: Built renderer.py — background, slingshot, birds, obstacles, and explosions (45 mins)
-
-April 24: Added rotating bird sprites and bird type cycling (30 mins)
-
-April 25: Added rubber band slingshot visual and trajectory dots (30 mins)
-
-April 26: Fixed trajectory to start from correct launch point (20 mins)
+Mira Jalloul:
+April 3: Created the GitHub repository and made the initial commit to start the project (5 mins)
+April 10: Created the ui.py and renderer.py files, added a basic draw_menu function in ui.py, and added a placeholder draw_scene function in renderer.py to set up the structure (30 mins)
+April 14: Created the assets folder, added the cloud image, and built the draw_background function in renderer.py to fill the sky, draw clouds, and draw the ground. Also fixed a small UI file issue where the test variable was not matching settings.py (1 hour)
+April 20: Wrote the draw_bird function in renderer.py, loaded and scaled the red, black, and yellow bird images, and uploaded the bird PNG assets to the assets folder (1 hour)
+April 21: Built out the full UI for the project — wrote draw_menu, draw_hub, draw_win, draw_losses, and draw_level_title in ui.py. Added the Button class with hover state and click detection, the draw_text_in_the_center helper, and the draw_transparent_background_for_levels overlay. Also tweaked the styling of the bird drawing to match the visual feel of the game (3 hours)
+April 22: Renamed draw_hub to draw_hud after Sazid pointed out the name conflict, and pulled in teammates' changes to keep my branch synced (45 mins)
+April 23: Pulled in updates from Hussein and Sazid and made small adjustments to keep the renderer compatible with their changes (30 mins)
+April 24: Added the draw_trajectory function in renderer.py to show a dotted preview of the bird's flight path while the player aims, tuned the trajectory dot color so it stands out on the sky, and built the explosion system (trigger_explosion, trigger_impact, and draw_explosions) so destroyed objects produce a fading expanding circle effect (1 hour 15 mins)
+April 25: Added the pig PNG to the assets folder, replaced the green-rectangle target rendering with a draw_pigs function, designed the slingshot graphic, and wired the birds_left parameter through the renderer so it knows which bird type to display in the win, lose, and playing states. Also implemented the bird rotation system so each shot uses a different bird color (red, yellow, black) (1 hour 30 mins)
+April 26: Made the bird visually move with the slingshot during drag and release at the launch point, removed the queued decorative birds that were cluttering the scene, helped refine level design with supporting pillars, and fixed the trajectory display so it shows as a single line of dots instead of two overlapping lines (2 hours)
