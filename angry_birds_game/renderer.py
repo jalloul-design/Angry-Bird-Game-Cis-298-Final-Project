@@ -43,7 +43,7 @@ def trigger_impact(x, y):
     new_trigger_impact = {"x": x, "y": y, "color": (200, 200, 200), "start_time": pygame.time.get_ticks()}
     activate_explosion.append(new_trigger_impact)
 
-# Claude: How do I draw the explosions to look like real explosion in an angry bird game
+
 def draw_explosions(screen):
     duration = 1000
     explosion_still_in_play = []
@@ -174,7 +174,7 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
     draw_targets(screen, targets)
     bird_angle = getattr(bird, 'angle', 0)
 
-    # Claude: How can I get the birds to rotate taking a hit rather than one color bird to do it
+  
     shots_taken = 5 - birds_left
     bird_index = shots_taken % 3
 
@@ -205,5 +205,5 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
     if slingshot_held and mouse_pos is not None:
         vx = dx * DRAG_MULTIPLIER
         vy = dy * DRAG_MULTIPLIER
-        # FIX: start trajectory from the bird's actual dragged position, not the slingshot anchor
+  
         draw_trajectory(screen, bird_draw_x, bird_draw_y, vx, vy)
