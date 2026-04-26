@@ -14,8 +14,7 @@ from settings import (
     TOPPLE_MAX_SPIN,
 )
 
-def apply_physics_defaults(obj, mass=1.0, friction=0.3, health=1, material="wood", object_type="block"): # added this helper to avoid rewriting in every lvl design
-    # ensure a physics object has the required motion, damage, and collision fields
+def apply_physics_defaults(obj, mass=1.0, friction=0.3, health=1, material="wood", object_type="block"):
     obj.setdefault('vx', 0)
     obj.setdefault('vy', 0)
     obj.setdefault('angle', 0)
@@ -30,7 +29,6 @@ def apply_physics_defaults(obj, mass=1.0, friction=0.3, health=1, material="wood
     obj.setdefault('supported', True)
     obj.setdefault('state', 'idle' if object_type == 'pig' else 'resting')
     obj.setdefault('active', True)
-    # keeps track of what this object is still touching so one crash doesnt repeat forever
     obj.setdefault('contact_ids', set())
     if object_type == "pig":
         obj.setdefault('radius', min(obj.get('width', 40), obj.get('height', 40)) / 2)
@@ -40,7 +38,6 @@ def apply_physics_defaults(obj, mass=1.0, friction=0.3, health=1, material="wood
 def update(bird):
     if not bird.is_launched or not bird.is_active:
         return
-    # store previous position for collision detection
     bird.prev_x = bird.x
     bird.prev_y = bird.y
     bird.vy += GRAVITY
@@ -49,19 +46,16 @@ def update(bird):
     bird.x += bird.vx
     bird.y += bird.vy
 
-    # update rotation
     if hasattr(bird, 'angle') and hasattr(bird, 'angular_velocity'):
         bird.angle += bird.angular_velocity * (1 / 60)
         bird.angular_velocity *= 0.99
 
-    # ground collision
     if bird.y + bird.radius >= GROUND_Y:
         bird.y = GROUND_Y - bird.radius
         bird.vy = 0
         bird.vx = 0
         bird.is_active = False
 
-# future position of bird after a number of frames
 def future_pos(bird, frames_ahead):
     x, y = bird.x, bird.y
     vx, vy = bird.vx, bird.vy
@@ -76,7 +70,6 @@ def future_pos(bird, frames_ahead):
             break
     return x, y
 
-# trajectory points for visualization
 def get_trajectory_points(bird, num_points=30, step_frames=5):
     points = []
     x, y = bird.x, bird.y
@@ -94,22 +87,14 @@ def get_trajectory_points(bird, num_points=30, step_frames=5):
                 break
     return points
 
-# trajectory from drag for aiming guide
 def get_trajectory_from_drag(drag_x, drag_y, num_points=30, step_frames=5):
     from settings import SLINGSHOT_X, SLINGSHOT_Y, DRAG_MULTIPLIER, MAX_DRAG, GROUND_Y
-    
-    # Clamp drag like in game_logic.py
     dx = max(-MAX_DRAG, min(MAX_DRAG, drag_x))
     dy = max(-MAX_DRAG, min(MAX_DRAG, drag_y))
-    
-    # Initial velocity based on drag
     vx = dx * DRAG_MULTIPLIER
     vy = dy * DRAG_MULTIPLIER
-    
-    #starting point is slingshot anchor
     points = []
     x, y = SLINGSHOT_X, SLINGSHOT_Y
-    
     for i in range(num_points):
         points.append((int(x), int(y)))
         for _ in range(step_frames):
@@ -118,19 +103,15 @@ def get_trajectory_from_drag(drag_x, drag_y, num_points=30, step_frames=5):
             vy *= AIR_RESISTANCE
             x += vx
             y += vy
-            # Stop if hits ground 
-            if y + 20 >= GROUND_Y or (abs(vx) < 0.1 and abs(vy) < 0.1):  # 20 is bird radius
+            if y + 20 >= GROUND_Y or (abs(vx) < 0.1 and abs(vy) < 0.1):
                 y = min(y, GROUND_Y - 20)
                 break
     return points
 
-# realistic collision response with momentum transfer and torque
 def apply_collision_response(obj1, obj2, collision_point):
-    # relative velocity
     rel_vx = obj1['vx'] - obj2['vx']
     rel_vy = obj1['vy'] - obj2['vy']
 
-    # use the middle of the shapes so birds blocks and pigs all push the right way
     center1_x, center1_y = _get_center(obj1)
     center2_x, center2_y = _get_center(obj2)
     dx = center2_x - center1_x
@@ -156,7 +137,6 @@ def apply_collision_response(obj1, obj2, collision_point):
     obj2['vx'] += impulse_x / obj2['mass']
     obj2['vy'] += impulse_y / obj2['mass']
 
-    # torque from collision force
     r1x = collision_point[0] - center1_x
     r1y = collision_point[1] - center1_y
     r2x = collision_point[0] - center2_x
@@ -171,7 +151,6 @@ def apply_collision_response(obj1, obj2, collision_point):
         I2 = _get_moment_of_inertia(obj2)
         obj2['angular_velocity'] += torque2 / I2
 
-    # friction impulse
     tx, ty = -ny, nx
     rel_vel_tangent = rel_vx * tx + rel_vy * ty
     friction = min(obj1.get('friction', 0.3), obj2.get('friction', 0.3))
@@ -188,28 +167,23 @@ def apply_collision_response(obj1, obj2, collision_point):
     obj2['vx'] += friction_x / obj2['mass']
     obj2['vy'] += friction_y / obj2['mass']
 
-# gets the middle point for birds and rectangles so the push direction stays consistent
 def _get_center(obj):
     if 'radius' in obj:
         return obj['x'], obj['y']
     return obj['x'] + obj.get('width', 0) / 2, obj['y'] + obj.get('height', 0) / 2
 
-# gives blocks a usable spin value too when they get hit by other pieces
 def _get_moment_of_inertia(obj):
     if 'radius' in obj:
         return max(0.5 * obj['mass'] * (obj.get('radius', 10) ** 2), 0.0001)
-
     width = obj.get('width', 10)
     height = obj.get('height', 10)
     return max((obj['mass'] * (width * width + height * height)) / 12, 0.0001)
 
-# update object rotation based on angular velocity
 def update_rotation(obj, dt=1/60):
     if 'angle' in obj and 'angular_velocity' in obj:
         obj['angle'] += obj['angular_velocity'] * dt
         obj['angular_velocity'] *= 0.99
 
-# update a physics object position and rotation
 def update_physics_object(obj, dt=1.0):
     if not obj.get('active', True):
         return
@@ -226,12 +200,10 @@ def update_physics_object(obj, dt=1.0):
 
     if 'vy' in obj:
         obj['vy'] += GRAVITY * dt
-
     if 'vx' in obj:
         obj['vx'] *= AIR_RESISTANCE
     if 'vy' in obj:
         obj['vy'] *= AIR_RESISTANCE
-
     if 'vx' in obj:
         obj['x'] += obj['vx'] * dt
     if 'vy' in obj:
@@ -241,13 +213,18 @@ def update_physics_object(obj, dt=1.0):
 
     if 'y' in obj and obj['y'] + obj.get('height', 0) >= GROUND_Y:
         obj['y'] = GROUND_Y - obj.get('height', 0)
+        fall_speed = abs(obj.get('vy', 0))
+        if fall_speed > 8 and obj.get('kind') == 'pig':
+            obj['health'] = 0
+            obj['active'] = False
+            obj['is_alive'] = False
+            obj['state'] = 'dead'
         if 'vy' in obj:
             obj['vy'] = 0
         if 'vx' in obj:
             obj['vx'] *= 0.8
         obj['supported'] = True
 
-# keeps pigs and blocks in predictable states based on support and motion; Used AI here to help build
 def resolve_world_states(objects):
     active_objects = [obj for obj in objects if obj.get('active', True)]
     support_data = {}
@@ -261,7 +238,6 @@ def resolve_world_states(objects):
         spin = abs(obj.get('angular_velocity', 0))
         resting_state = 'idle' if obj.get('kind') == 'pig' else 'resting'
 
-        # if the center hangs past the support edge the piece should start tipping that way
         if support_data[id(obj)]['has_support'] and not support_data[id(obj)]['center_supported']:
             _apply_topple_bias(obj, support_data[id(obj)])
             speed = math.hypot(obj.get('vx', 0), obj.get('vy', 0))
@@ -288,7 +264,6 @@ def resolve_world_states(objects):
             obj['is_static'] = False
             obj['supported'] = False
 
-# checks if a piece should fall or not; gravity effects
 def _get_support_data(obj, active_objects):
     obj_left = obj['x']
     obj_right = obj['x'] + obj.get('width', 0)
@@ -312,7 +287,6 @@ def _get_support_data(obj, active_objects):
         overlap = _get_support_overlap(other, obj)
         if overlap is None:
             continue
-
         left, right = overlap
         if support_left is None:
             support_left = left

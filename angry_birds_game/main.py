@@ -13,9 +13,10 @@ import ui
 import level_1
 import level_2
 import level_3
+import level_4
 from source import bird as bird_module
 
-LEVELS = [level_1, level_2, level_3]
+LEVELS = [level_1, level_2, level_3, level_4]
 
 def load_level(index):
     level = LEVELS[index]

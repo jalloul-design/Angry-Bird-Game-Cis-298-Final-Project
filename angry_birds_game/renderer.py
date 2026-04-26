@@ -31,6 +31,7 @@ pig_img = pygame.transform.scale(pig_img, (40, 40))
 slingshot_img = pygame.transform.scale(slingshot_img, (150, 170))
 activate_explosion = []
 
+
 def trigger_explosion(x, y, obj_type="obstacle"):
     if obj_type == "target":
         color = (250, 200, 50)
@@ -39,11 +40,13 @@ def trigger_explosion(x, y, obj_type="obstacle"):
     recurring_explosion = {"x": x, "y": y, "color": color, "start_time": pygame.time.get_ticks()}
     activate_explosion.append(recurring_explosion)
 
+
 def trigger_impact(x, y):
     new_trigger_impact = {"x": x, "y": y, "color": (200, 200, 200), "start_time": pygame.time.get_ticks()}
     activate_explosion.append(new_trigger_impact)
 
 
+# Claude: How do I draw the explosions to look like real explosion in an angry bird game
 def draw_explosions(screen):
     duration = 1000
     explosion_still_in_play = []
@@ -79,12 +82,14 @@ def draw_explosions(screen):
     for explosion in explosion_still_in_play:
         activate_explosion.append(explosion)
 
+
 def draw_background(screen):
     screen.fill(COLOR_SKY)
     screen.blit(cloud_img, (60, 40))
     screen.blit(cloud_img, (460, 70))
     screen.blit(cloud_img, (920, 35))
     pygame.draw.rect(screen, COLOR_GROUND, (0, 620, SCREEN_WIDTH, SCREEN_HEIGHT))
+
 
 def draw_health_bar(screen, x, y, width, health, max_health):
     if max_health <= 0:
@@ -97,6 +102,7 @@ def draw_health_bar(screen, x, y, width, health, max_health):
     pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, bar_width, bar_height))
     pygame.draw.rect(screen, (200, 40, 40), (bar_x, bar_y, filled_width, bar_height))
 
+
 def draw_bird(screen, bird_img, x, y, angle=0):
     if angle != 0:
         rotated_img = pygame.transform.rotate(bird_img, -angle * 180 / 3.14159)
@@ -105,18 +111,21 @@ def draw_bird(screen, bird_img, x, y, angle=0):
     else:
         screen.blit(bird_img, (x, y))
 
+
 def draw_pigs(screen, pigs):
     for pig in pigs:
         if pig.get("active", True):
             screen.blit(pig_img, (pig["x"], pig["y"]))
+
 
 def draw_slingshot(screen):
     x = SLINGSHOT_X - 90
     y = SLINGSHOT_Y - 30
     screen.blit(slingshot_img, (x, y))
 
+
 def draw_trajectory(screen, start_x, start_y, vx, vy):
-    """Draw a dotted trajectory starting from the bird's actual position"""
+    """Draw a dotted trajectory starting from the slingshot launch point"""
     x = start_x
     y = start_y
     simulate_vx = vx
@@ -124,8 +133,9 @@ def draw_trajectory(screen, start_x, start_y, vx, vy):
 
     for i in range(15):
         for t in range(4):
-            simulate_vx *= AIR_RESISTANCE   # FIX: apply air resistance so arc matches real flight
             simulate_vy += GRAVITY
+            simulate_vx *= AIR_RESISTANCE
+            simulate_vy *= AIR_RESISTANCE
             x += simulate_vx
             y += simulate_vy
 
@@ -134,18 +144,20 @@ def draw_trajectory(screen, start_x, start_y, vx, vy):
 
         pygame.draw.circle(screen, COLOR_TRAJECTORY, (int(x), int(y)), 2)
 
+
 def draw_obstacles(screen, obstacles):
     for obs in obstacles:
         if obs.get("active", True):
             x, y, w, h = obs["x"], obs["y"], obs["width"], obs["height"]
             color = _get_obstacle_color(obs.get("material", "wood"))
             pygame.draw.rect(screen, (max(0, color[0] - 50), max(0, color[1] - 50), max(0, color[2] - 50)),
-                           (x + 2, y + 2, w, h))
+                             (x + 2, y + 2, w, h))
             pygame.draw.rect(screen, color, (x, y, w, h))
             pygame.draw.rect(screen, (max(0, color[0] - 30), max(0, color[1] - 30), max(0, color[2] - 30)),
-                           (x, y, w, h), 2)
+                             (x, y, w, h), 2)
             if obs.get('health') is not None:
                 draw_health_bar(screen, x, y, w, obs['health'], obs.get('max_health', obs['health']))
+
 
 def draw_targets(screen, targets):
     for target in targets:
@@ -153,6 +165,7 @@ def draw_targets(screen, targets):
             x, y, w, h = target["x"], target["y"], target["width"], target["height"]
             if target.get('health') is not None:
                 draw_health_bar(screen, x, y, w, target['health'], target.get('max_health', target['health']))
+
 
 def _get_obstacle_color(material):
     if material == "glass":
@@ -173,7 +186,7 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
     draw_targets(screen, targets)
     bird_angle = getattr(bird, 'angle', 0)
 
-  
+    # Claude: How can I get the birds to rotate taking a hit rather than one color bird to do it
     shots_taken = 5 - birds_left
     bird_index = shots_taken % 3
 
@@ -204,5 +217,4 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
     if slingshot_held and mouse_pos is not None:
         vx = dx * DRAG_MULTIPLIER
         vy = dy * DRAG_MULTIPLIER
-  
-        draw_trajectory(screen, bird_draw_x, bird_draw_y, vx, vy)
+        draw_trajectory(screen, SLINGSHOT_X, SLINGSHOT_Y, vx, vy)
