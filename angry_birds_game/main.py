@@ -20,7 +20,10 @@ LEVELS = [level_1, level_2, level_3]
 
 def load_level(index):
     level = LEVELS[index]
-    return level.get_obstacles(), level.get_targets(), Bird()
+    obstacles = level.get_obstacles()
+    targets = level.get_targets()
+    physics.resolve_world_states(obstacles + targets)
+    return obstacles, targets, Bird()
 
 def main():
     pygame.init()
@@ -34,7 +37,7 @@ def main():
     birds_left = 5
     slingshot_held = False
     mouse_start = None
-    game_state = "menu"   # <-- FIX: start at menu, not "playing"
+    game_state = "menu"   # start at menu
     shake_timer = 0
     hub_buttons = []
     menu_buttons = []
@@ -59,7 +62,7 @@ def main():
                 pygame.quit()
                 return
 
-            # --- MENU state ---
+            # menu
             if game_state == "menu" and event.type == pygame.MOUSEBUTTONDOWN:
                 for button in menu_buttons:
                     if button.mouse_clicked(event):
@@ -69,7 +72,7 @@ def main():
                             pygame.quit()
                             return
 
-            # --- HUB state ---
+            #  Hub state
             if game_state == "hub" and event.type == pygame.MOUSEBUTTONDOWN:
                 for button in hub_buttons:
                     if button.mouse_clicked(event):
@@ -86,12 +89,10 @@ def main():
                         elif button.action == "goto_menu":
                             game_state = "menu"
 
-            # --- PLAYING state ---
             if game_state == "playing":
                 slingshot_held, mouse_start = game_logic.handle_input(
                     event, bird, slingshot_held, mouse_start)
 
-            # --- WIN / LOSE state ---
             if game_state in ("win", "lose"):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
@@ -128,7 +129,6 @@ def main():
                             elif button.action == "goto_menu":
                                 game_state = "menu"
 
-        # ======== DRAW SECTION ========
 
         if game_state == "menu":
             menu_buttons = ui.draw_menu(screen)
@@ -142,16 +142,17 @@ def main():
             for obj in obstacles + targets:
                 physics.update_physics_object(obj)
 
-            # go through every new thing the bird touches but dont end the turn on first impact
-            hits = collision.check(bird, obstacles + targets)
-            for hit in hits:
-                renderer.trigger_impact(bird.x, bird.y)
-                center_x = hit["x"] + hit["width"] // 2
-                center_y = hit["y"] + hit["height"] // 2
-                obj_type = "target" if hit in targets else "obstacle"
+            #birds will fall and hit structures, some fall damage
+            bird_events = collision.check(bird, obstacles + targets)
+            block_events, pig_events = collision.check_environment_collisions(obstacles, targets)
+            physics.resolve_world_states(obstacles + targets)
+
+            for event in bird_events + block_events + pig_events:
+                center_x, center_y = event["center"]
+                renderer.trigger_impact(center_x, center_y)
+                obj_type = "target" if event["target"] in targets else "obstacle"
                 renderer.trigger_explosion(center_x, center_y, obj_type)
-                collision.destroy(hit)
-                score += 100
+                score += event["score"]
                 shake_timer = 10
 
             if not bird.is_active or game_logic.check_lose(bird, targets):
