@@ -207,14 +207,3 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
         vy = dy * DRAG_MULTIPLIER
         # FIX: start trajectory from the bird's actual dragged position, not the slingshot anchor
         draw_trajectory(screen, bird_draw_x, bird_draw_y, vx, vy)
-
-    else:
-        bird_draw_x = bird.x
-        bird_draw_y = bird.y
-
-    draw_bird(screen, current_bird_img, bird_draw_x - 30, bird_draw_y - 30, bird_angle)
-
-    if slingshot_held and mouse_pos is not None:
-        vx = dx * DRAG_MULTIPLIER
-        vy = dy * DRAG_MULTIPLIER
-        draw_trajectory(screen, SLINGSHOT_X, SLINGSHOT_Y, vx, vy)
