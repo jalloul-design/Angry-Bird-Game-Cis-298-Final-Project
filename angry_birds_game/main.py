@@ -14,13 +14,42 @@ import level_1
 import level_2
 import level_3
 from source import bird as bird_module
-from source.bird import Bird
 
 LEVELS = [level_1, level_2, level_3]
 
 def load_level(index):
     level = LEVELS[index]
-    return level.get_obstacles(), level.get_targets(), Bird()
+    return level.get_obstacles(), level.get_targets(), bird_module.Bird()
+
+def draw_slingshot_rubber_band(screen, mouse_pos):
+    """
+    Draws a rubber band line from the slingshot anchor to the mouse
+    so the player can see they are stretching the slingshot.
+    """
+    mx, my = mouse_pos
+    dx = settings.SLINGSHOT_X - mx
+    dy = settings.SLINGSHOT_Y - my
+    dx = max(-settings.MAX_DRAG, min(settings.MAX_DRAG, dx))
+    dy = max(-settings.MAX_DRAG, min(settings.MAX_DRAG, dy))
+    clamped_x = settings.SLINGSHOT_X - dx
+    clamped_y = settings.SLINGSHOT_Y - dy
+
+    pygame.draw.line(screen, (139, 90, 40),
+                     (settings.SLINGSHOT_X - 20, settings.SLINGSHOT_Y - 60),
+                     (clamped_x, clamped_y), 3)
+    pygame.draw.line(screen, (139, 90, 40),
+                     (settings.SLINGSHOT_X + 20, settings.SLINGSHOT_Y - 60),
+                     (clamped_x, clamped_y), 3)
+
+def draw_low_bird_warning(screen, birds_left):
+    """
+    Flashes a warning on screen when the player only has 1 bird left.
+    """
+    if birds_left == 1:
+        if (pygame.time.get_ticks() // 400) % 2 == 0:
+            font = pygame.font.SysFont("Arial", 30, bold=True)
+            warning = font.render("LAST BIRD!", True, (255, 50, 50))
+            screen.blit(warning, (settings.SCREEN_WIDTH // 2 - warning.get_width() // 2, 20))
 
 def main():
     pygame.init()
@@ -34,10 +63,10 @@ def main():
     birds_left = 5
     slingshot_held = False
     mouse_start = None
-    game_state = "menu"   # <-- FIX: start at menu, not "playing"
+    game_state = "playing"
     shake_timer = 0
     hub_buttons = []
-    menu_buttons = []
+    win_lose_button_list = []
     title_timer = pygame.time.get_ticks()
     show_title = True
 
@@ -59,17 +88,6 @@ def main():
                 pygame.quit()
                 return
 
-            # --- MENU state ---
-            if game_state == "menu" and event.type == pygame.MOUSEBUTTONDOWN:
-                for button in menu_buttons:
-                    if button.mouse_clicked(event):
-                        if button.action == "goto_hub":
-                            game_state = "hub"
-                        elif button.action == "quit_game":
-                            pygame.quit()
-                            return
-
-            # --- HUB state ---
             if game_state == "hub" and event.type == pygame.MOUSEBUTTONDOWN:
                 for button in hub_buttons:
                     if button.mouse_clicked(event):
@@ -84,14 +102,12 @@ def main():
                             title_timer = pygame.time.get_ticks()
                             break
                         elif button.action == "goto_menu":
-                            game_state = "menu"
+                            pass
 
-            # --- PLAYING state ---
             if game_state == "playing":
                 slingshot_held, mouse_start = game_logic.handle_input(
                     event, bird, slingshot_held, mouse_start)
 
-            # --- WIN / LOSE state ---
             if game_state in ("win", "lose"):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
@@ -111,56 +127,28 @@ def main():
                             show_title = True
                             title_timer = pygame.time.get_ticks()
 
-                # Handle win/lose button clicks
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    win_lose_buttons = win_lose_button_list if 'win_lose_button_list' in dir() else []
-                    for button in win_lose_button_list if 'win_lose_button_list' in locals() else []:
-                        if button.mouse_clicked(event):
-                            if button.action.startswith("play_level_"):
-                                selected_level = int(button.action.split("play_level_")[1]) - 1
-                                current_level = selected_level
-                                obstacles, targets, bird = load_level(current_level)
-                                score = 0
-                                birds_left = 5
-                                game_state = "playing"
-                                show_title = True
-                                title_timer = pygame.time.get_ticks()
-                            elif button.action == "goto_menu":
-                                game_state = "menu"
-
-        # ======== DRAW SECTION ========
-
-        if game_state == "menu":
-            menu_buttons = ui.draw_menu(screen)
-
-        elif game_state == "hub":
+        if game_state == "hub":
             hub_buttons = ui.draw_hub(screen, score, birds_left, current_level + 1)
             show_title = False
 
         elif game_state == "playing":
             physics.update(bird)
-            for obj in obstacles + targets:
-                physics.update_physics_object(obj)
-
             hit = collision.check(bird, obstacles + targets)
             if hit:
-                renderer.trigger_impact(bird.x, bird.y)
-                center_x = hit["x"] + hit["width"] // 2
-                center_y = hit["y"] + hit["height"] // 2
-                obj_type = "target" if hit in targets else "obstacle"
-                renderer.trigger_explosion(center_x, center_y, obj_type)
-                collision.destroy(hit)
+                collision.destroy_object(hit)
                 score += 100
                 bird.is_active = False
                 bird.is_launched = False
                 shake_timer = 10
+                renderer.trigger_explosion(
+                    hit["x"], hit["y"],
+                    "target" if hit in targets else "obstacle"
+                )
+                renderer.trigger_impact(hit["x"], hit["y"])
 
             if not bird.is_active or game_logic.check_lose(bird, targets):
-                from settings import GROUND_Y
-                if bird.y + 20 >= GROUND_Y - 5:
-                    renderer.trigger_impact(bird.x, bird.y)
                 birds_left -= 1
-                bird = Bird()
+                bird = bird_module.Bird()
                 if birds_left <= 0 and not game_logic.check_win(targets):
                     game_state = "lose"
 
@@ -180,8 +168,13 @@ def main():
             temp_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
             renderer.draw_scene(temp_surface, bird, obstacles, targets, bg,
                                 slingshot_held, mouse_pos if slingshot_held else None, birds_left)
+
+            if slingshot_held:
+                draw_slingshot_rubber_band(temp_surface, mouse_pos)
+
             screen.blit(temp_surface, (shake_x, shake_y))
             ui.draw_hud(screen, score, birds_left, current_level + 1)
+            draw_low_bird_warning(screen, birds_left)
 
             if show_title and pygame.time.get_ticks() - title_timer < settings.LEVEL_TITLE_DURATION:
                 ui.draw_level_title(screen, current_level + 1, title_timer)

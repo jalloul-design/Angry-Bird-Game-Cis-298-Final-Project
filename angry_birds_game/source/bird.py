@@ -4,7 +4,8 @@
 from settings import SLINGSHOT_X, SLINGSHOT_Y
 
 class Bird:
-    __slots__ = ['x', 'y', 'vx', 'vy', 'prev_x', 'prev_y', 'is_launched', 'is_active', 'radius', 'mass', 'angle', 'angular_velocity', 'friction'] 
+    # keeps track of what the bird is still touching so one hit doesnt repeat every frame
+    __slots__ = ['x', 'y', 'vx', 'vy', 'prev_x', 'prev_y', 'is_launched', 'is_active', 'radius', 'mass', 'angle', 'angular_velocity', 'friction', 'contact_ids', 'hit_count'] 
     
     def __init__(self):
         self.radius = 20 #SIZE
@@ -25,4 +26,8 @@ class Bird:
         self.is_active = True
         self.angle = 0
         self.angular_velocity = 0
+        # reset what objects the bird is in contact with for the next shot
+        self.contact_ids = set()
+        # counts real damage hits for this shot so chain hits stay controlled
+        self.hit_count = 0
     

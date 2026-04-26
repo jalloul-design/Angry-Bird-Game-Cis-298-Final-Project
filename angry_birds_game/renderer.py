@@ -1,7 +1,18 @@
 import pygame
 from pathlib import Path
 from settings import SLINGSHOT_X, SLINGSHOT_Y, DRAG_MULTIPLIER, COLOR_TRAJECTORY, MAX_DRAG
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, COLOR_SKY, COLOR_GROUND, GRAVITY, GROUND_Y, SKY_Y
+from settings import (
+    SCREEN_WIDTH,
+    SCREEN_HEIGHT,
+    COLOR_SKY,
+    COLOR_GROUND,
+    GRAVITY,
+    GROUND_Y,
+    SKY_Y,
+    COLOR_OBSTACLE_WOOD,
+    COLOR_OBSTACLE_GLASS,
+    COLOR_OBSTACLE_STONE,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ASSETS_DIR = BASE_DIR / "assets"
@@ -148,36 +159,36 @@ def draw_trajectory(screen, start_x, start_y, vx, vy):
         pygame.draw.circle(screen, COLOR_TRAJECTORY, (int(x), int(y)), 2)
 
 def draw_obstacles(screen, obstacles):
-    from settings import COLOR_OBSTACLE
     for obs in obstacles: # Used AI to help with this
         if obs.get("active", True):
             x, y, w, h = obs["x"], obs["y"], obs["width"], obs["height"]
+            color = _get_obstacle_color(obs.get("material", "wood"))
             # Draw shadow
-            pygame.draw.rect(screen, (max(0, COLOR_OBSTACLE[0] - 50), max(0, COLOR_OBSTACLE[1] - 50), max(0, COLOR_OBSTACLE[2] - 50)),
+            pygame.draw.rect(screen, (max(0, color[0] - 50), max(0, color[1] - 50), max(0, color[2] - 50)),
                            (x + 2, y + 2, w, h))
             # Draw main obstacle
-            pygame.draw.rect(screen, COLOR_OBSTACLE, (x, y, w, h))
+            pygame.draw.rect(screen, color, (x, y, w, h))
             # Draw border
-            pygame.draw.rect(screen, (max(0, COLOR_OBSTACLE[0] - 30), max(0, COLOR_OBSTACLE[1] - 30), max(0, COLOR_OBSTACLE[2] - 30)),
+            pygame.draw.rect(screen, (max(0, color[0] - 30), max(0, color[1] - 30), max(0, color[2] - 30)),
                            (x, y, w, h), 2)
             if obs.get('health') is not None: # health bar on obstacles
                 draw_health_bar(screen, x, y, w, obs['health'], obs.get('max_health', obs['health']))
 
 def draw_targets(screen, targets):
-    from settings import COLOR_TARGET
     for target in targets: # Used AI to help with this
         if target.get("active", True):
             x, y, w, h = target["x"], target["y"], target["width"], target["height"]
-            # Draw shadow
-            pygame.draw.rect(screen, (max(0, COLOR_TARGET[0] - 50), max(0, COLOR_TARGET[1] - 50), max(0, COLOR_TARGET[2] - 50)),
-                           (x + 2, y + 2, w, h))
-            # Draw main target
-            pygame.draw.rect(screen, COLOR_TARGET, (x, y, w, h))
-            # Draw border
-            pygame.draw.rect(screen, (max(0, COLOR_TARGET[0] - 30), max(0, COLOR_TARGET[1] - 30), max(0, COLOR_TARGET[2] - 30)),
-                           (x, y, w, h), 2)
+            # the pig sprite already shows the target so this just leaves the health info above it
             if target.get('health') is not None: # health bar on targets
                 draw_health_bar(screen, x, y, w, target['health'], target.get('max_health', target['health']))
+
+#obstacle colors based on material type
+def _get_obstacle_color(material):
+    if material == "glass":
+        return COLOR_OBSTACLE_GLASS
+    if material == "stone":
+        return COLOR_OBSTACLE_STONE
+    return COLOR_OBSTACLE_WOOD
 
 
 def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, birds_left):
