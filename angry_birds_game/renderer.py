@@ -125,7 +125,6 @@ def draw_trajectory(screen, start_x, start_y, vx, vy):
     for i in range(15):
         for t in range(4):
             simulate_vx *= AIR_RESISTANCE   # FIX: apply air resistance so arc matches real flight
-            simulate_vy *= AIR_RESISTANCE
             simulate_vy += GRAVITY
             x += simulate_vx
             y += simulate_vy
