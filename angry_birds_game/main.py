@@ -55,9 +55,9 @@ def main():
     birds_left = 5
     slingshot_held = False
     mouse_start = None
-    game_state = "menu"          # <-- FIX: start at menu
+    game_state = "menu"
     shake_timer = 0
-    menu_buttons = []            # <-- NEW
+    menu_buttons = []
     hub_buttons = []
     win_lose_button_list = []
     title_timer = pygame.time.get_ticks()
@@ -124,7 +124,7 @@ def main():
                                 show_title = True
                                 title_timer = pygame.time.get_ticks()
                             elif button.action == "goto_menu":
-                                game_state = "menu"   # <-- FIX: was "hub", now "menu"
+                                game_state = "menu"
 
             if game_state == "playing":
                 slingshot_held, mouse_start = game_logic.handle_input(
@@ -160,6 +160,12 @@ def main():
 
         elif game_state == "playing":
             physics.update(bird)
+
+            # FIX: resolve world states so blocks/pigs fall when support is removed
+            physics.resolve_world_states(obstacles + targets)
+
+            for obj in obstacles + targets:
+                physics.update_physics_object(obj)
 
             events = collision.check(bird, obstacles + targets)
             for event in events:
@@ -211,16 +217,15 @@ def main():
             else:
                 show_title = False
 
-        else:
+        elif game_state in ("win", "lose"):
             bg = bg_images[current_level] if current_level < len(bg_images) else None
             renderer.draw_scene(screen, bird, obstacles, targets, bg,
                                 slingshot_held, mouse_pos if slingshot_held else None, birds_left)
             ui.draw_hud(screen, score, birds_left, current_level + 1)
-
-        if game_state == "win":
-            win_lose_button_list = ui.draw_win(screen, current_level + 1, current_level == len(LEVELS) - 1)
-        elif game_state == "lose":
-            win_lose_button_list = ui.draw_losses(screen, current_level + 1)
+            if game_state == "win":
+                win_lose_button_list = ui.draw_win(screen, current_level + 1, current_level == len(LEVELS) - 1)
+            else:
+                win_lose_button_list = ui.draw_losses(screen, current_level + 1)
 
         pygame.display.flip()
 
