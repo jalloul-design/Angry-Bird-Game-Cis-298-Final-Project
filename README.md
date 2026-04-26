@@ -25,6 +25,7 @@ python main.py
 ## Commit Log
 
 Hussein Alsawafi:
+
 April 20: Added level 1, 2, and 3 layouts with obstacles and targets (45 mins)
 
 April 21: Added bird class foundation (30 mins)
@@ -56,6 +57,7 @@ April 26: Resolved all git merge conflicts across the project (30 mins)
 April 26: Updated README with full project details (20 mins)
 
 Sazid Ludi:
+
 April 10: Added bird class to track its state, velocity, and whether if its in bounds or not; fixed the settings spelling issue and added the source folder structure (55 mins)
 
 April 11: Created physics file to implement gravity, added the bird movement update loop, fixed physics input, added future_pos for trajectory prediction, and added a .gitignore file (1 hour 15 mins)
@@ -89,6 +91,7 @@ April 25: Added more impacts so the bird does not stop after only one hit (40 mi
 April 25: Added supporting pillars and refined the level design to work with the new physics (35 mins)
 
 Mira Jalloul:
+
 April 3: Created the GitHub repository and made the initial commit to start the project (5 mins)
 
 April 10: Created the ui.py and renderer.py files, added a basic draw_menu function in ui.py, and added a placeholder draw_scene function in renderer.py to set up the structure (30 mins)
