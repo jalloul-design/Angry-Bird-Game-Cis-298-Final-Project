@@ -215,7 +215,7 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
     draw_explosions(screen)
     draw_pigs(screen, targets)
 
-    if slingshot_held and mouse_pos is not None:
+    if slingshot_held and mouse_pos is not None: # if the player is hokding the slingshot do yo
         mx, my = mouse_pos
         dx = SLINGSHOT_X - mx
         dy = SLINGSHOT_Y - my
