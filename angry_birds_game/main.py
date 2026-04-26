@@ -21,6 +21,36 @@ def load_level(index):
     level = LEVELS[index]
     return level.get_obstacles(), level.get_targets(), bird_module.Bird()
 
+def draw_slingshot_rubber_band(screen, mouse_pos):
+    """
+    Draws a rubber band line from the slingshot anchor to the mouse
+    so the player can see they are stretching the slingshot.
+    """
+    mx, my = mouse_pos
+    dx = settings.SLINGSHOT_X - mx
+    dy = settings.SLINGSHOT_Y - my
+    dx = max(-settings.MAX_DRAG, min(settings.MAX_DRAG, dx))
+    dy = max(-settings.MAX_DRAG, min(settings.MAX_DRAG, dy))
+    clamped_x = settings.SLINGSHOT_X - dx
+    clamped_y = settings.SLINGSHOT_Y - dy
+
+    pygame.draw.line(screen, (139, 90, 40),
+                     (settings.SLINGSHOT_X - 20, settings.SLINGSHOT_Y - 60),
+                     (clamped_x, clamped_y), 3)
+    pygame.draw.line(screen, (139, 90, 40),
+                     (settings.SLINGSHOT_X + 20, settings.SLINGSHOT_Y - 60),
+                     (clamped_x, clamped_y), 3)
+
+def draw_low_bird_warning(screen, birds_left):
+    """
+    Flashes a warning on screen when the player only has 1 bird left.
+    """
+    if birds_left == 1:
+        if (pygame.time.get_ticks() // 400) % 2 == 0:
+            font = pygame.font.SysFont("Arial", 30, bold=True)
+            warning = font.render("LAST BIRD!", True, (255, 50, 50))
+            screen.blit(warning, (settings.SCREEN_WIDTH // 2 - warning.get_width() // 2, 20))
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
@@ -138,8 +168,13 @@ def main():
             temp_surface = pygame.Surface((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
             renderer.draw_scene(temp_surface, bird, obstacles, targets, bg,
                                 slingshot_held, mouse_pos if slingshot_held else None, birds_left)
+
+            if slingshot_held:
+                draw_slingshot_rubber_band(temp_surface, mouse_pos)
+
             screen.blit(temp_surface, (shake_x, shake_y))
             ui.draw_hud(screen, score, birds_left, current_level + 1)
+            draw_low_bird_warning(screen, birds_left)
 
             if show_title and pygame.time.get_ticks() - title_timer < settings.LEVEL_TITLE_DURATION:
                 ui.draw_level_title(screen, current_level + 1, title_timer)
