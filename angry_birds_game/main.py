@@ -30,10 +30,10 @@ def draw_slingshot_rubber_band(screen, mouse_pos):
     clamped_x = settings.SLINGSHOT_X - dx
     clamped_y = settings.SLINGSHOT_Y - dy
     pygame.draw.line(screen, (139, 90, 40),
-                     (settings.SLINGSHOT_X - 60, settings.SLINGSHOT_Y - 35),  # match left dot
+                     (settings.SLINGSHOT_X - 60, settings.SLINGSHOT_Y - 35),
                      (clamped_x, clamped_y), 5)
     pygame.draw.line(screen, (139, 90, 40),
-                     (settings.SLINGSHOT_X + 45, settings.SLINGSHOT_Y - 30),  # match right dot
+                     (settings.SLINGSHOT_X + 45, settings.SLINGSHOT_Y - 30),
                      (clamped_x, clamped_y), 5)
 
 def draw_low_bird_warning(screen, birds_left):
@@ -55,8 +55,9 @@ def main():
     birds_left = 5
     slingshot_held = False
     mouse_start = None
-    game_state = "playing"
+    game_state = "menu"          # <-- FIX: start at menu
     shake_timer = 0
+    menu_buttons = []            # <-- NEW
     hub_buttons = []
     win_lose_button_list = []
     title_timer = pygame.time.get_ticks()
@@ -80,21 +81,50 @@ def main():
                 pygame.quit()
                 return
 
-            if game_state == "hub" and event.type == pygame.MOUSEBUTTONDOWN:
-                for button in hub_buttons:
-                    if button.mouse_clicked(event):
-                        if button.action.startswith("play_level_"):
-                            selected_level = int(button.action.split("play_level_")[1]) - 1
-                            current_level = selected_level
-                            obstacles, targets, bird = load_level(current_level)
-                            score = 0
-                            birds_left = 5
-                            game_state = "playing"
-                            show_title = True
-                            title_timer = pygame.time.get_ticks()
-                            break
-                        elif button.action == "goto_menu":
-                            pass
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+
+                # --- MENU ---
+                if game_state == "menu":
+                    for button in menu_buttons:
+                        if button.mouse_clicked(event):
+                            if button.action == "goto_hub":
+                                game_state = "hub"
+                            elif button.action == "quit_game":
+                                pygame.quit()
+                                return
+
+                # --- HUB ---
+                elif game_state == "hub":
+                    for button in hub_buttons:
+                        if button.mouse_clicked(event):
+                            if button.action.startswith("play_level_"):
+                                selected_level = int(button.action.split("play_level_")[1]) - 1
+                                current_level = selected_level
+                                obstacles, targets, bird = load_level(current_level)
+                                score = 0
+                                birds_left = 5
+                                game_state = "playing"
+                                show_title = True
+                                title_timer = pygame.time.get_ticks()
+                                break
+                            elif button.action == "goto_menu":
+                                game_state = "menu"
+
+                # --- WIN / LOSE ---
+                elif game_state in ("win", "lose"):
+                    for button in win_lose_button_list:
+                        if button.mouse_clicked(event):
+                            if button.action.startswith("play_level_"):
+                                selected_level = int(button.action.split("play_level_")[1]) - 1
+                                current_level = selected_level
+                                obstacles, targets, bird = load_level(current_level)
+                                score = 0
+                                birds_left = 5
+                                game_state = "playing"
+                                show_title = True
+                                title_timer = pygame.time.get_ticks()
+                            elif button.action == "goto_menu":
+                                game_state = "menu"   # <-- FIX: was "hub", now "menu"
 
             if game_state == "playing":
                 slingshot_held, mouse_start = game_logic.handle_input(
@@ -118,22 +148,13 @@ def main():
                             game_state = "playing"
                             show_title = True
                             title_timer = pygame.time.get_ticks()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    for button in win_lose_button_list:
-                        if button.mouse_clicked(event):
-                            if button.action.startswith("play_level_"):
-                                selected_level = int(button.action.split("play_level_")[1]) - 1
-                                current_level = selected_level
-                                obstacles, targets, bird = load_level(current_level)
-                                score = 0
-                                birds_left = 5
-                                game_state = "playing"
-                                show_title = True
-                                title_timer = pygame.time.get_ticks()
-                            elif button.action == "goto_menu":
-                                game_state = "hub"
 
-        if game_state == "hub":
+        # ======== DRAW EACH FRAME ========
+
+        if game_state == "menu":
+            menu_buttons = ui.draw_menu(screen)
+
+        elif game_state == "hub":
             hub_buttons = ui.draw_hub(screen, score, birds_left, current_level + 1)
             show_title = False
 
