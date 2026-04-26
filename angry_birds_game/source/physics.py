@@ -214,7 +214,7 @@ def update_physics_object(obj, dt=1.0):
     if 'y' in obj and obj['y'] + obj.get('height', 0) >= GROUND_Y:
         obj['y'] = GROUND_Y - obj.get('height', 0)
         fall_speed = abs(obj.get('vy', 0))
-        if fall_speed > 8 and obj.get('kind') == 'pig':
+        if fall_speed > 25 and obj.get('kind') == 'pig':
             obj['health'] = 0
             obj['active'] = False
             obj['is_alive'] = False

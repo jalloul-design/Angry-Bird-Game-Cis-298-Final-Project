@@ -7,7 +7,7 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 FPS = 60
 TITLE = "Angry Birds"
-TOTAL_LEVELS = 3
+TOTAL_LEVELS = 4
 
 # Slingshot anchor point (x, y) on screen
 SLINGSHOT_X = 200
