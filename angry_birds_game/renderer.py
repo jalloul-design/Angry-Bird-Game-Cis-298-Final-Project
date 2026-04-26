@@ -212,11 +212,8 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
     else:
         current_bird_img = black_bird_img
 
-    draw_bird(screen, current_bird_img, bird.x - 30, bird.y - 30, bird_angle)
-
     draw_explosions(screen)
     draw_pigs(screen, targets)
-
 
     if slingshot_held and mouse_pos is not None:
         mx, my = mouse_pos
@@ -225,8 +222,16 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
         # Using Hussein Function to clamp the drag
         dx = max(-MAX_DRAG, min(MAX_DRAG, dx))
         dy = max(-MAX_DRAG, min(MAX_DRAG, dy))
+        bird_draw_x = SLINGSHOT_X - dx
+        bird_draw_y = SLINGSHOT_Y - dy
+
+    else:
+        bird_draw_x = bird.x
+        bird_draw_y = bird.y
+
+    draw_bird(screen, current_bird_img, bird_draw_x - 30, bird_draw_y - 30, bird_angle)
+
+    if slingshot_held and mouse_pos is not None:
         vx = dx * DRAG_MULTIPLIER
         vy = dy * DRAG_MULTIPLIER
         draw_trajectory(screen, SLINGSHOT_X, SLINGSHOT_Y, vx, vy)
-
-
