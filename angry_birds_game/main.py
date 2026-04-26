@@ -121,7 +121,9 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for button in win_lose_button_list:
                         if button.mouse_clicked(event):
-                            if button.action == "restart":
+                            if button.action.startswith("play_level_"):
+                                selected_level = int(button.action.split("play_level_")[1]) - 1
+                                current_level = selected_level
                                 obstacles, targets, bird = load_level(current_level)
                                 score = 0
                                 birds_left = 5
@@ -130,14 +132,6 @@ def main():
                                 title_timer = pygame.time.get_ticks()
                             elif button.action == "goto_menu":
                                 game_state = "hub"
-                            elif button.action == "next_level":
-                                if current_level < len(LEVELS) - 1:
-                                    current_level += 1
-                                    obstacles, targets, bird = load_level(current_level)
-                                    birds_left = 5
-                                    game_state = "playing"
-                                    show_title = True
-                                    title_timer = pygame.time.get_ticks()
 
         if game_state == "hub":
             hub_buttons = ui.draw_hub(screen, score, birds_left, current_level + 1)
