@@ -118,6 +118,26 @@ def main():
                             game_state = "playing"
                             show_title = True
                             title_timer = pygame.time.get_ticks()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for button in win_lose_button_list:
+                        if button.mouse_clicked(event):
+                            if button.action == "restart":
+                                obstacles, targets, bird = load_level(current_level)
+                                score = 0
+                                birds_left = 5
+                                game_state = "playing"
+                                show_title = True
+                                title_timer = pygame.time.get_ticks()
+                            elif button.action == "goto_menu":
+                                game_state = "hub"
+                            elif button.action == "next_level":
+                                if current_level < len(LEVELS) - 1:
+                                    current_level += 1
+                                    obstacles, targets, bird = load_level(current_level)
+                                    birds_left = 5
+                                    game_state = "playing"
+                                    show_title = True
+                                    title_timer = pygame.time.get_ticks()
 
         if game_state == "hub":
             hub_buttons = ui.draw_hub(screen, score, birds_left, current_level + 1)
@@ -126,7 +146,6 @@ def main():
         elif game_state == "playing":
             physics.update(bird)
 
-            # handle bird collisions with obstacles and targets
             events = collision.check(bird, obstacles + targets)
             for event in events:
                 if event.get("destroyed"):
@@ -137,13 +156,11 @@ def main():
                     renderer.trigger_explosion(cx, cy, obj_type)
                     renderer.trigger_impact(cx, cy)
 
-            # handle environment collisions between blocks and pigs
             block_events, pig_events = collision.check_environment_collisions(obstacles, targets)
             for event in block_events + pig_events:
                 if event.get("destroyed"):
                     score += event.get("score", 100)
 
-            # check if bird is out of bounds
             if collision.out_of_bounds(bird) or not bird.is_active:
                 birds_left -= 1
                 bird = bird_module.Bird()
