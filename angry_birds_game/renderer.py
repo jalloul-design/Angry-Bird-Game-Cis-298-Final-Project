@@ -214,9 +214,6 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
 
     draw_bird(screen, current_bird_img, bird.x - 30, bird.y - 30, bird_angle)
 
-    draw_bird(screen, red_bird_img, 170, 470)
-    draw_bird(screen, black_bird_img, 100, 500)
-    draw_bird(screen, yellow_bird_img, 50, 520)
     draw_explosions(screen)
     draw_pigs(screen, targets)
 
@@ -231,6 +228,5 @@ def draw_scene(screen, bird, obstacles, targets, bg, slingshot_held, mouse_pos, 
         vx = dx * DRAG_MULTIPLIER
         vy = dy * DRAG_MULTIPLIER
         draw_trajectory(screen, SLINGSHOT_X, SLINGSHOT_Y, vx, vy)
-
 
 
